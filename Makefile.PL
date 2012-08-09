@@ -2,12 +2,13 @@ use inc::Module::Install;
 name 'App-Zamakist';
 all_from 'lib/App/Zamakist.pm';
 
-# requires '';
-
+requires 'MooseX::Types::Path::Class';
+requires 'MooseX::Getopt';
+requires 'Web::Query';
+requires 'Text::UnicodeBox::Table';
+requires 'Term::ReadLine::Zoid';
 tests 't/*.t';
-author_tests 'xt';
 
 test_requires 'Test::More';
-auto_set_repository;
 auto_include;
 WriteAll;
