@@ -74,9 +74,6 @@ sub run {
 
     $self->handler->report_all();
 
-    # Report Result
-    # Success / Failure
-    # User choice (Failure Retry?)
     unless ($self->skip_retry) {
         my @unfetched_mediafiles = $self->handler->filter_mediafiles(sub { !$_->has_permalink });
         for my $mediafile (@unfetched_mediafiles) {
@@ -91,21 +88,8 @@ sub run {
     }
 
     $self->handler->download_all();
-    # Unfetched zero or user passed
-    # Download
-
-#    while(defined (my $input = $self->term->readline())) {
-#        $self->handle_term_input($input);
-#    }
 }
 
-sub handle_term_input {
-    my ($self, $input) = @_;
-
-    return unless length $input;
-
-
-}
 __PACKAGE__->meta->make_immutable;
 
 1;

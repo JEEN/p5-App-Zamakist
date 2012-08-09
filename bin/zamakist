@@ -1,0 +1,7 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use lib 'lib';
+use App::Zamakist;
+
+App::Zamakist->new_with_options()->run();
