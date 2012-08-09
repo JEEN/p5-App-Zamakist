@@ -10,5 +10,6 @@ requires 'Term::ReadLine::Zoid';
 tests 't/*.t';
 
 test_requires 'Test::More';
+install_script glob('bin/*');
 auto_include;
 WriteAll;
