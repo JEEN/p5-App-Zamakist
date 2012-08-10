@@ -4,7 +4,9 @@ use namespace::autoclean;
 with qw(App::Zamakist::Role::Reportable);
 use Web::Query;
 use URI;
+use URI::QueryParam;
 use LWP::UserAgent;
+use utf8;
 
 has 'mediafiles' => (
     traits => [ 'Array' ],
@@ -29,16 +31,17 @@ sub name { 'GOM' }
 
 sub search_link { 
     my $uri = URI->new('http://search.gomtv.com/searchjm.gom');
-    $uri->query_form( key => $_[1] );
+    $uri->query_form( key => $_[1], preface => 0 );
     $uri;
 }
 
 sub find_permalink {
     my ($self, $filename) = @_;
 
-    wq($self->search_link($filename))
-        ->find('table#wp_list.smi_list tr td.title div a')
-        ->attr('href');
+    my $elm = wq($self->search_link($filename))
+                  ->find('table#wp_list.smi_list tr:nth-child(3) td.title > div > a');
+
+    ($elm->attr('href'), $elm->text());
 }
 
 sub available_mediafiles {
@@ -48,9 +51,15 @@ sub available_mediafiles {
 sub add {
     my ($self, $media, $job) = @_;
 
-    my $permalink = $self->find_permalink($media->filename);
+    my ($permalink, $title) = $self->find_permalink($media->filename);
     if ($permalink) {
        $media->permalink(URI->new($permalink));
+       $media->name($title);
+       if ($title =~ /(?:한글|통합)/) {
+           $media->language('KOR');
+       } else {
+           $media->language('ENG');
+       }
     }
     $self->add_mediafile($media);
     return 1;

@@ -14,9 +14,18 @@ BEGIN {
 };
 
 has 'dir' => (
+    traits   => [ 'Getopt' ],
     is       => 'ro',
     isa      => 'Path::Class::Dir',
-    required => 1,
+    cmd_aliases => 'd',
+    coerce   => 1,
+);
+
+has 'file' => (
+    traits   => [ 'Getopt' ],
+    is       => 'ro',
+    isa      => 'Path::Class::File',
+    cmd_aliases => 'f',
     coerce   => 1,
 );
 
@@ -24,6 +33,12 @@ has 'skip_retry' => (
     is       => 'ro',
     isa      => 'Bool',
     default  => 0,
+);
+
+has 'lang' => (
+    is     => 'ro',
+    isa    => 'Str',
+    default => 1,
 );
 
 has 'term' => (
@@ -48,28 +63,42 @@ sub _build_term {
 sub BUILD {
     my $self = shift;
 
-    unless (-d $self->dir) {
-        confess "Not Found Dir : ".$self->dir;
-    }
+    return 1;
+}
 
+sub _parse_file_basename {
+    my ($self, $file) = @_;
+
+    return unless -f $file;
+    my ($filename, $ext) = $file->basename =~ /^(.+)\.(.+)$/;
+    return unless $ext =~ /^(?:mkv|avi|mp4|mpe?g)$/;
+    return ($filename, $ext);
+}
+
+sub add_mediafile {
+    my ($self, $file) = @_;
+
+    my ($filename, $ext) = $self->_parse_file_basename($file);
+    return unless $filename;
+    $self->handler->add(
+        App::Zamakist::Media->new({
+            filename => $filename,
+            ext      => $ext,
+        })
+    );
     return 1;
 }
 
 sub run {
     my $self = shift;
 
-    my @files;
-    while(my $elm = $self->dir->next) {
-        next unless -f $elm;
-        my ($filename, $ext) = $elm->basename =~ /^(.+)\.(.+)$/;
-        next unless $ext =~ /^(?:mkv|avi|mp4|mpe?g)$/;
-
-        $self->handler->add(
-            App::Zamakist::Media->new({
-                filename => $filename,
-                ext      => $ext,
-            })
-        );
+    if ($self->dir && -d $self->dir) {
+        while(my $elm = $self->dir->next) {
+            $self->add_mediafile($elm);            
+        }
+    } 
+    elsif ($self->file && -f $self->file) {
+        $self->add_mediafile($self->file);
     }
 
     $self->handler->report_all();
@@ -81,7 +110,7 @@ sub run {
         }
     }
 
-    while(defined (my $input = $self->term->readline("Continue to download? [y/n] ", 'y'))) {
+    while(defined (my $input = $self->term->readline("Continue to download? [y/n] "))) {
         $input =~ s/[\r\n]//g;
         exit if $input eq 'n';
         last if $input eq 'y'; 
