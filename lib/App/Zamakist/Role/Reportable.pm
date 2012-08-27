@@ -51,8 +51,8 @@ sub report {
     }
 
     if ($has_permalink) {
-        print colored ("Found $i subscriptions", "bold green")."\n";
-        print colored ("Maybe $unreliable_qty Subscriptions mismatched.", "bold red")."\n" if $unreliable_qty;
+        print colored ("Found $i subscription(s)", "bold green")."\n";
+        print colored ("Maybe $unreliable_qty Subscription(s) mismatched.", "bold red")."\n" if $unreliable_qty;
     } else {
         print colored ("Not found $i subscription of media files", "bold red")."\n";
     }
