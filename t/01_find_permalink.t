@@ -19,10 +19,4 @@ my $media = $app->handler->mediafiles->[0];
 ok($media->filename eq 'The.Mentalist.S04E01.HDTV.XviD-ASAP.[VTV].Scarlet.Ribbons');
 ok($media->ext      eq 'avi');
 
-diag $app->handler->search_link($media->filename);
-
-my ($link, $title) = $app->handler->find_permalink($media->filename);
-diag $link;
-diag $title;
-
 done_testing();
